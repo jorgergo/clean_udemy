@@ -1,6 +1,6 @@
 # Udemy Clean Window with Focus Detection
 
-**Udemy Clean Window** is a Tampermonkey userscript that optimizes your Udemy course-viewing experience by automatically hiding certain distracting UI elements when the browser window is not focused. It restores the elements when you return to the window, maintaining an unobstructed and clean video player.
+**Udemy Clean Window** is a Tampermonkey userscript designed to enhance your Udemy course-viewing experience. It automatically hides distracting elements when the browser window is not focused, and restores them when you refocus on the window. This creates a cleaner, more immersive video player experience.
 
 ---
 
@@ -30,61 +30,108 @@
 4. Replace the default content with the script below and save.
 
 ```javascript
-// Include the full script provided here
 // ==UserScript==
-// @name         Udemy Clean Window with Focus Detection
+// @name         Udemy Clean Window
 // @namespace    http://tampermonkey.net/
-// @version      0.5
-// @description  Automatically hides certain elements on Udemy course pages when the window loses focus
-// @author       iNdra
+// @version      0.1
+// @description  Hides distracting UI elements on Udemy course pages based on focus
+// @author       JorgeRgo (Original script by iNdra)
 // @match        https://www.udemy.com/course/*
-// @downloadURL  https://github.com/indramal/Udemy-Clean-Window/blob/main/Udemy-Clean-Window.js
-// @updateURL    https://github.com/indramal/Udemy-Clean-Window.js
-// @homepageURL  https://github.com/indramal/Udemy-Clean-Window/
+// @downloadURL  https://github.com/jorgergo/clean_udemy/raw/main/Udemy-Clean-Window.js
+// @updateURL    https://github.com/jorgergo/clean_udemy/raw/main/Udemy-Clean-Window.js
+// @homepageURL  https://github.com/jorgergo/clean_udemy
 // @grant        none
 // ==/UserScript==
 
-(function () {
+(function() {
     'use strict';
 
-    // Elements to toggle visibility
-    const elementsToToggle = [
-        '.shaka-control-bar--control-bar-container--OfnMI', // Shaka control bar
-        '.video-viewer--header-gradient--x4Zw0', // Video header
-        '.video-viewer--title-overlay--YZQuH', // Shadow bar
-        '.next-and-previous--container--kZxyo.next-and-previous--previous--dBI5b', // Previous arrow
-        '.next-and-previous--container--kZxyo.next-and-previous--next--8Avih', // Next arrow
-        'button[data-purpose="open-course-content"]' // Course content toggle button
-    ];
+    // Function to add toggle button
+    function addToggleButton() {
+        // Select the target element before which the button should be added
+        const targetElement = document.querySelector('.app--row--E-WFM.app--dashboard--Z4Zxm');
 
-    // Function to toggle visibility of elements
-    const toggleVisibility = (isVisible) => {
-        const visibility = isVisible ? 'visible' : 'hidden';
-        elementsToToggle.forEach(selector => {
-            const element = document.querySelector(selector);
-            if (element) {
-                element.style.visibility = visibility;
-            }
-        });
-    };
+        if (targetElement) {
+            // Create the toggle button
+            const toggleButton = document.createElement('button');
+            toggleButton.innerText = 'Clean Window';
 
-    // Event handlers for focus/blur
-    const handleWindowBlur = () => {
-        toggleVisibility(false); // Hide elements when window loses focus
-    };
+            // Style the button
+            toggleButton.style.backgroundColor = '#3498db';
+            toggleButton.style.color = '#fff';
+            toggleButton.style.border = 'none';
+            toggleButton.style.padding = '10px 20px';
+            toggleButton.style.borderRadius = '5px';
+            toggleButton.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.2)';
+            toggleButton.style.cursor = 'pointer';
+            toggleButton.style.marginBottom = '10px';
 
-    const handleWindowFocus = () => {
-        toggleVisibility(true); // Show elements when window regains focus
-    };
+            // Add the toggle functionality
+            toggleButton.addEventListener('click', function() {
 
-    // Initialize script
-    window.addEventListener('load', function () {
-        // Add blur and focus event listeners
-        window.addEventListener('blur', handleWindowBlur);
-        window.addEventListener('focus', handleWindowFocus);
+                // Get the height of the element with the specified classes
+                const headerElement = document.querySelector('.app--row--E-WFM.app--header--QuLOL');
+                const headerHeight = headerElement ? headerElement.offsetHeight : 0;
 
-        // Set initial visibility state based on current focus
-        toggleVisibility(document.hasFocus());
+                if (window.scrollY !== headerHeight) {
+                    window.scrollTo({
+                        top: 0,        // Scroll to the top of the page
+                        left: 0,       // No horizontal scroll
+                        behavior: 'smooth' // Smooth scrolling
+                    });
+                }
+
+                // Select and click the sidebar close button
+                const specifiedButton = document.querySelector('[data-purpose="sidebar-button-close"]');
+                if (specifiedButton) {
+                    specifiedButton.click(); // Programmatically click the button
+                }
+
+                // Toggle the visibility of the shaka control bar
+                const shakaElement = document.querySelector('.shaka-control-bar--control-bar-container--OfnMI');
+                if (shakaElement) {
+                    const currentVisibility = shakaElement.style.visibility;
+                    shakaElement.style.visibility = currentVisibility === 'hidden' ? 'visible' : 'hidden';
+                }
+
+                // Toggle the video header gradient overlay
+                const videoTitleElement = document.querySelector('.video-viewer--header-gradient--x4Zw0');
+                if (videoTitleElement) {
+                    const currentVisibility = videoTitleElement.style.visibility;
+                    videoTitleElement.style.visibility = currentVisibility === 'hidden' ? 'visible' : 'hidden';
+                }
+
+                // Toggle the video shadow overlay
+                const shadowbar = document.querySelector('.video-viewer--title-overlay--YZQuH');
+                if (shadowbar) {
+                    const currentVisibility = shadowbar.style.visibility;
+                    shadowbar.style.visibility = currentVisibility === 'hidden' ? 'visible' : 'hidden';
+                }
+
+                // Adjust the max height of curriculum items
+                const curriculumElements = document.querySelectorAll('.curriculum-item-view--scaled-height-limiter--lEOjL.curriculum-item-view--no-sidebar--LGmz-');
+                curriculumElements.forEach(function(element) {
+                    element.style.maxHeight = 'calc(100vh - 35px)';
+                });
+
+                if (window.scrollY !== headerHeight) {
+                    setTimeout(function() {
+                        window.scrollBy({
+                            top: headerHeight,
+                            left: 0,
+                            behavior: 'smooth'
+                        });
+                    }, 500); // Delay to ensure the first scroll is completed
+                }
+            });
+
+            // Insert the button before the target element
+            targetElement.parentNode.insertBefore(toggleButton, targetElement);
+        }
+    }
+
+    // Run the function when the DOM is fully loaded
+    window.addEventListener('load', function() {
+        addToggleButton();
     });
 })();
-
