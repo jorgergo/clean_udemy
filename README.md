@@ -35,10 +35,8 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  Hides distracting UI elements on Udemy course pages based on focus
-// @author       JorgeRgo (Original script by iNdra)
+// @author       Jorgergo (Original script by iNdra)
 // @match        https://www.udemy.com/course/*
-// @downloadURL  https://github.com/jorgergo/clean_udemy/raw/main/Udemy-Clean-Window.js
-// @updateURL    https://github.com/jorgergo/clean_udemy/raw/main/Udemy-Clean-Window.js
 // @homepageURL  https://github.com/jorgergo/clean_udemy
 // @grant        none
 // ==/UserScript==
